@@ -1,0 +1,98 @@
+package com.capgemini.productmgmt.ui;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.InputMismatchException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+import com.capgemini.productmgmt.exception.ProductException;
+import com.capgemini.productmgmt.service.ProductService;
+
+public class Client {
+
+	public static void main(String[] args) throws ProductException {
+		Scanner scanner = new Scanner(System.in);
+		ProductService productService = new ProductService();
+		int choice = 0;
+		
+		
+		boolean choiceFlag = false;
+		do {
+			try {
+				System.out.println("\n1.Update Product Price\n2.Display Product List\n3.Exit");
+
+				choice = scanner.nextInt();
+				switch (choice) {
+				case 1: {
+					boolean valid = false;
+
+					String category = null;
+					do {
+						try {
+							System.out.println("\nEnter the Product Category");
+							category = scanner.next();
+							productService.isCategoryValid(category);
+							valid = true;
+						} catch (ProductException e) {
+							System.err.println(e.getMessage());
+							valid = false;
+							scanner.nextLine();
+						}
+					} while (!valid);
+
+					valid = false;
+					int hike = 0;
+					do {
+						try {
+							System.out.println("\nEnter hike Rate : ");
+							scanner = new Scanner(System.in);
+							hike = scanner.nextInt();
+							productService.isHikeValid(hike);
+							valid = true;
+						} catch (ProductException e) {
+							System.err.println(e.getMessage());
+							valid = false;
+							scanner.nextLine();
+						} catch (InputMismatchException e) {
+							System.err.println("\nInput should contain only digits");
+							valid = false;
+							scanner.nextLine();
+						}
+					} while (!valid);
+					productService.updateProducts(category, hike);
+				}
+					break;
+				case 2:
+					Map<String, Integer> productMap = productService.getProductDetails();
+					List<String> list = new ArrayList<>();
+					Collection<String> collection = productMap.keySet();
+					list.addAll(collection);
+					Iterator<String> iterator = list.iterator();
+					System.out.println("\nProduct Details");
+					while (iterator.hasNext()) {
+						String key = iterator.next().toString();
+						System.out.println(key + " : " + productMap.get(key));
+					}
+					break;
+				case 3:
+					scanner.close();
+					System.exit(0);
+					break;
+				default:
+					System.out.println("Input should be 1,2,3");
+					choiceFlag = false;
+					break;
+				}
+			} catch (InputMismatchException e) {
+				System.err.println("Input should contain only digits");
+				scanner.nextLine();
+				choiceFlag = false;
+			}
+		} while (!choiceFlag);
+		
+	}
+
+}
